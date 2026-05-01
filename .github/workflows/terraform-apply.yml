@@ -1,0 +1,36 @@
+name: Terraform Manual Apply
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to apply"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - prod
+
+jobs:
+  apply:
+    name: Apply selected environment
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.5
+
+      - name: Terraform init
+        working-directory: environments/${{ inputs.environment }}
+        run: terraform init -backend=false
+
+      - name: Terraform apply
+        working-directory: environments/${{ inputs.environment }}
+        run: terraform apply -var-file="terraform.tfvars" -auto-approve

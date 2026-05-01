@@ -1,0 +1,48 @@
+name: Terraform CI
+
+on:
+  pull_request:
+    paths:
+      - "**/*.tf"
+      - "**/*.tfvars"
+      - ".github/workflows/terraform-ci.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "**/*.tf"
+      - "**/*.tfvars"
+      - ".github/workflows/terraform-ci.yml"
+
+jobs:
+  terraform:
+    name: Terraform validate and plan
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: [dev, prod]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.5
+
+      - name: Terraform format check
+        run: terraform fmt -check -recursive
+
+      - name: Terraform init
+        working-directory: environments/${{ matrix.environment }}
+        run: terraform init -backend=false
+
+      - name: Terraform validate
+        working-directory: environments/${{ matrix.environment }}
+        run: terraform validate
+
+      - name: Terraform plan
+        working-directory: environments/${{ matrix.environment }}
+        run: terraform plan -var-file="terraform.tfvars" -no-color

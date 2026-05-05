@@ -79,3 +79,12 @@ That makes it safe for public demos and interviews.
 - I keep environment-specific values in tfvars files.
 - I avoid storing secrets in Terraform code.
 - I document the process so the team can operate it consistently.
+
+
+## Sample execution
+
+cd terraform-process-showcase/environments/dev
+terraform init
+terraform fmt
+terraform validate
+terraform plan
